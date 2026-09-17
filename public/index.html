@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartella Clinica Personale</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --accent-purple: #7c3aed;
+      --accent-soft: #a855f7;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .main-header {
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%);
+      padding: 16px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .nav-tabs {
+      border-bottom: 2px solid #334155;
+    }
+
+    .nav-tabs .nav-link {
+      color: var(--text-sub);
+      font-weight: 600;
+      border: none;
+      padding: 12px 20px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: var(--accent-purple);
+      color: white;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .card-custom {
+      background-color: var(--card-dark);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    }
+
+    .form-control, .form-select {
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: #0f172a;
+      color: white;
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 0.25rem rgba(168, 85, 247, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #64748b;
+      font-style: italic;
+    }
+
+    .btn-purple {
+      background-color: var(--accent-purple);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+    }
+
+    .btn-purple:hover {
+      background-color: #6d28d9;
+      color: white;
+    }
+
+    .quick-tag {
+      background-color: #334155;
+      color: #cbd5e1;
+      border: none;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .quick-tag:hover {
+      background-color: var(--accent-purple);
+      color: white;
+    }
+
+    .legal-footer {
+      background-color: #1e293b;
+      border-top: 1px solid #334155;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+
+    /* FORMATO DE IMPRESIÓN PROFESIONAL */
+    @media print {
+      body { background-color: white !important; color: black !important; }
+      .no-print, nav, .btn, form, input, select, .nav-tabs, footer { display: none !important; }
+      .card-custom { background-color: white !important; border: 1px solid #ccc !important; color: black !important; box-shadow: none !important; }
+      .print-header { display: block !important; border-bottom: 2px solid #000; margin-bottom: 20px; }
+      .text-slate-300, .text-muted { color: black !important; }
+    }
+
+    .print-header { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Principal -->
+  <header class="main-header d-flex justify-content-between align-items-center no-print mb-4">
+    <div class="d-flex align-items-center gap-2">
+      <h3 class="m-0 fw-bold text-white">🏥 CARTELLA CLINICA PERSONALE</h3>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <small class="text-light opacity-75">PAZIENTE SELEZIONATO:</small>
+        <select id="selectProfilo" class="form-select form-select-sm" onchange="cambiarPerfil()" style="width: auto;"></select>
+      </div>
+      <button class="btn btn-sm btn-outline-light" onclick="abrirModalMiembro()">+ Nuovo Membro</button>
+      <button class="btn btn-sm btn-success fw-bold px-3" onclick="window.print()">🖨️ Stampa Report Medico</button>
+    </div>
+  </header>
+
+  <!-- Encabezado de Impresión -->
+  <div class="container print-header">
+    <h2 class="fw-bold m-0 text-uppercase">REPORTE CLINICO DEL PAZIENTE</h2>
+    <p class="m-0"><strong>Paziente:</strong> <span id="printNomePaziente">---</span> | <strong>Data Report:</strong> <span id="printData"></span></p>
+    <hr>
+  </div>
+
+  <div class="container-fluid px-4">
+
+    <!-- Navegación por Pestañas -->
+    <ul class="nav nav-tabs mb-4 no-print" id="mainTabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabDashboard">📊 DASHBOARD</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabDiario">📝 DIARIO E SINTOMI</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFarmaci">💊 FARMACI E ALLARMI</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabVisite">🩺 VISITE ED ESAMI</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabMedici">👨‍⚕️ MEDICI E SPECIALISTI</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabEsami">📁 DOCUMENTI ED ESAMI</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSuggerimenti">💡 MIGLIORA L'APP</a></li>
+    </ul>
+
+    <div class="tab-content">
+      
+      <!-- DASHBOARD -->
+      <div class="tab-pane fade show active" id="tabDashboard">
+        <div class="row g-4">
+          <div class="col-md-12">
+            <div class="card-custom">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-uppercase m-0" style="color: var(--accent-soft);">📈 Andamento Clinico: Umore e Livello Dolore</h6>
+                <small class="text-muted">Grafico di comprensione medica rapida (1 secondo)</small>
+              </div>
+              <canvas id="chartUmore" style="max-height: 260px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIARIO E SINTOMI -->
+      <div class="tab-pane fade" id="tabDiario">
+        <div class="row g-4">
+          <div class="col-md-5 no-print">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">📝 Diario Clinico Quotidiano</h6>
+              <form id="formDiario" onsubmit="guardarDiario(event)">
+                <div class="mb-2">
+                  <label class="form-label small">Data del Registro</label>
+                  <input type="date" id="dData" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small d-flex justify-content-between">
+                    <span>Stato d'Animo / Umore:</span>
+                    <strong id="labelUmore" style="color: var(--accent-soft);">8/10 😊</strong>
+                  </label>
+                  <input type="range" id="dUmore" class="form-range" min="1" max="10" value="8" oninput="actualizarSliderLabels()">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small d-flex justify-content-between">
+                    <span>Livello di Dolore / Sintomi:</span>
+                    <strong id="labelDolore" class="text-danger">2/10 🟢</strong>
+                  </label>
+                  <input type="range" id="dDolore" class="form-range" min="0" max="10" value="2" oninput="actualizarSliderLabels()">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small">Sintomi Rapidi (Clicca per aggiungere):</label>
+                  <div class="d-flex flex-wrap gap-1 mb-2">
+                    <button type="button" class="quick-tag" onclick="addTag('Mal di testa')">+ Mal di testa</button>
+                    <button type="button" class="quick-tag" onclick="addTag('Febbre')">+ Febbre</button>
+                    <button type="button" class="quick-tag" onclick="addTag('Stanchezza')">+ Stanchezza</button>
+                    <button type="button" class="quick-tag" onclick="addTag('Nausea')">+ Nausea</button>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <textarea id="dSintomi" class="form-control" rows="3" placeholder="Scrivi qui i sintomi o note fisiologiche del giorno..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-purple w-100">SALVA NEL DIARIO 🌿</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Storico Annotazioni Sintomi</h6>
+              <div id="listaDiario"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FARMACI E ALLARMI -->
+      <div class="tab-pane fade" id="tabFarmaci">
+        <div class="row g-4">
+          <div class="col-md-4 no-print">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">💊 Terapia e Programmazione Pastiglie</h6>
+              <form id="formFarmaci" onsubmit="guardarFarmaco(event)">
+                <div class="mb-2"><input type="text" id="fNome" class="form-control" placeholder="es. Ibuprofene" required></div>
+                <div class="mb-2"><input type="text" id="fDose" class="form-control" placeholder="es. 400 mg"></div>
+                <div class="mb-2"><input type="text" id="fFrequenza" class="form-control" placeholder="es. Ogni 8 ore al bisogno"></div>
+                <div class="mb-2">
+                  <label class="form-label small">Orario Allarme Pastiglia</label>
+                  <input type="time" id="fOrario" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small">Stato del Trattamento</label>
+                  <select id="fStato" class="form-select">
+                    <option value="Attivo">Attivo (Allarme On)</option>
+                    <option value="Concluso">Concluso (Allarme Off)</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-purple w-100">SALVA TERAPIA</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Farmaci Registrati</h6>
+              <div id="listaFarmaci"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISITE ED ESAMI -->
+      <div class="tab-pane fade" id="tabVisite">
+        <div class="row g-4">
+          <div class="col-md-4 no-print">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">🩺 Prenota Visita o Ritiro Referti</h6>
+              <form id="formVisite" onsubmit="guardarVisita(event)">
+                <div class="mb-2">
+                  <select id="vTipo" class="form-select">
+                    <option value="Visita Medica">Visita Medica</option>
+                    <option value="Controllo Routine">Controllo Routine</option>
+                    <option value="Ritiro Referti">Ritiro Referti / Esame</option>
+                  </select>
+                </div>
+                <div class="mb-2"><input type="text" id="vMotivo" class="form-control" placeholder="es. Controllo Cardiologico" required></div>
+                <div class="mb-2"><input type="text" id="vMedico" class="form-control" placeholder="es. Dott. Rossi"></div>
+                <div class="mb-2"><input type="text" id="vLuogo" class="form-control" placeholder="es. Ospedale San Raffaele, Via Olgettina 60"></div>
+                <div class="mb-2"><input type="date" id="vData" class="form-control" required></div>
+                <div class="mb-2"><input type="time" id="vOra" class="form-control" required></div>
+                <div class="mb-3"><textarea id="vIndicazioni" class="form-control" placeholder="Indicazioni (es. Digiuno 12 ore)"></textarea></div>
+                <button type="submit" class="btn btn-purple w-100">SALVA CON PROMEMORIA</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Prossimi Appuntamenti e Controlli</h6>
+              <div id="listaVisite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDICI E SPECIALISTI -->
+      <div class="tab-pane fade" id="tabMedici">
+        <div class="row g-4">
+          <div class="col-md-4 no-print">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">👨‍⚕️ Aggiungi Medico di Riferimento</h6>
+              <form id="formMedici" onsubmit="guardarMedico(event)">
+                <div class="mb-2"><input type="text" id="mNome" class="form-control" placeholder="es. Dott. Marco Bianchi" required></div>
+                <div class="mb-2"><input type="text" id="mSpecialita" class="form-control" placeholder="es. Cardiologo / Medico Curante"></div>
+                <div class="mb-2"><input type="text" id="mStruttura" class="form-control" placeholder="es. Clinica La Madonnina"></div>
+                <div class="mb-2"><input type="text" id="mIndirizzo" class="form-control" placeholder="es. Via Milano 12, Milano"></div>
+                <div class="mb-3"><input type="text" id="mTelefono" class="form-control" placeholder="es. +39 02 1234567"></div>
+                <button type="submit" class="btn btn-purple w-100">SALVA MEDICO</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Elenco Medici Sanitari</h6>
+              <div id="listaMedici" class="row g-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTI ED ESAMI -->
+      <div class="tab-pane fade" id="tabEsami">
+        <div class="row g-4">
+          <div class="col-md-4 no-print">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">📁 Carica o Scatta Foto Esame</h6>
+              <form id="formEsami" onsubmit="guardarEsame(event)">
+                <div class="mb-2"><input type="text" id="eTitolo" class="form-control" placeholder="es. Analisi del Sangue" required></div>
+                <div class="mb-2">
+                  <select id="eCategoria" class="form-select">
+                    <option value="Laboratorio">Laboratorio / Sangue</option>
+                    <option value="Radiologia">Radiologia / TAC / RMN</option>
+                    <option value="Ricetta">Ricetta / Prescrizione</option>
+                    <option value="Altro">Foto Muestra Fisiologica / Altro</option>
+                  </select>
+                </div>
+                <div class="mb-2"><input type="date" id="eData" class="form-control" required></div>
+                <div class="mb-3">
+                  <label class="form-label small">Seleziona File o Usa Fotocamera</label>
+                  <input type="file" id="eFile" class="form-control" accept="image/*,application/pdf" capture="environment">
+                </div>
+                <button type="submit" class="btn btn-purple w-100">CARICA DOCUMENTO</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Archivio Esami e Foto</h6>
+              <div id="listaEsami" class="row g-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUGGERIMENTI -->
+      <div class="tab-pane fade" id="tabSuggerimenti">
+        <div class="card-custom">
+          <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">💡 Proponi Miglioramenti per l'App</h6>
+          <textarea id="suggerimentoTesto" class="form-control mb-3" rows="4" placeholder="Scrivi qui quali nuove funzioni ti piacerebbe vedere nella Cartella Clinica..."></textarea>
+          <button class="btn btn-purple" onclick="inviarSuggerimento()">INVIA SUGGERIMENTO</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pie de página (Legal & GDPR Italia) -->
+  <footer class="legal-footer no-print mt-5 p-4">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <strong class="text-white">🔒 Protezione Dati & Privacy (GDPR UE 2016/679)</strong>
+          <p class="m-0">I dati clinici sono salvati unicamente nel tuo dispositivo locale (<code>historial.db</code>). Nessun dato viene trasmesso o venduto a terzi.</p>
+        </div>
+        <div class="col-md-6">
+          <strong class="text-warning">⚖️ Chiarimento Legale & Disclaimer Medico (Art. 2222 C.C.)</strong>
+          <p class="m-0">Questo diario clinico personale è uno strumento informativo e non costituisce diagnosi o sostituto del parere medico professionale.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Nuevo Miembro -->
+  <div class="modal fade" id="modalMiembro" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background-color: var(--card-dark); color: white; border: 1px solid #334155;">
+        <div class="modal-header"><h5 class="modal-title">+ Nuovo Membro Famiglia</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="text" id="mNomeF" class="form-control mb-2" placeholder="Nome Completo">
+          <input type="text" id="mParentelaF" class="form-control" placeholder="Parentela (es. Madre, Figlio)">
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-purple w-100" onclick="crearMiembro()">Salva Membro</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let activeFamiliareId = 1;
+    let chartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printData').innerText = new Date().toLocaleDateString('it-IT');
+      document.getElementById('dData').value = new Date().toISOString().split('T')[0];
+      document.getElementById('eData').value = new Date().toISOString().split('T')[0];
+      cargarFamiliari();
+      setInterval(verificarAlarmas, 30000); // Chequea alarmas cada 30 segundos
+    });
+
+    function actualizarSliderLabels() {
+      const u = document.getElementById('dUmore').value;
+      const d = document.getElementById('dDolore').value;
+      document.getElementById('labelUmore').innerText = `${u}/10${u > 6 ? '😊' : '😐'}`;
+      document.getElementById('labelDolore').innerText = `${d}/10${d > 5 ? '🔴' : '🟢'}`;
+    }
+
+    function addTag(texto) {
+      const area = document.getElementById('dSintomi');
+      area.value += (area.value ? ', ' : '') + texto;
+    }
+
+    async function cargarFamiliari() {
+      try {
+        const res = await fetch('/api/familiari');
+        const datos = await res.json();
+        const select = document.getElementById('selectProfilo');
+        select.innerHTML = datos.map(f => `<option value="${f.id}">${f.nome} (${f.parentela})</option>`).join('');
+        if (datos.length > 0) {
+          activeFamiliareId = datos[0].id;
+          document.getElementById('printNomePaziente').innerText = datos[0].nome;
+        }
+        cargarTodo();
+      } catch (err) {
+        console.error('Errore durante il caricamento dei familiari:', err);
+      }
+    }
+
+    function cambiarPerfil() {
+      activeFamiliareId = document.getElementById('selectProfilo').value;
+      const select = document.getElementById('selectProfilo');
+      document.getElementById('printNomePaziente').innerText = select.options[select.selectedIndex].text;
+      cargarTodo();
+    }
+
+    function cargarTodo() {
+      cargarDiarioYGrafica();
+      cargarFarmaci();
+      cargarVisite();
+      cargarMedici();
+      cargarEsami();
+    }
+
+    // DIARIO & GRAFICA
+    async function cargarDiarioYGrafica() {
+      const res = await fetch(`/api/diario?familiare_id=${activeFamiliareId}`);
+      const datos = await res.json();
+      
+      document.getElementById('listaDiario').innerHTML = datos.map(d => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+          <div class="d-flex justify-content-between">
+            <strong style="color: var(--accent-soft);">📅 ${d.data}</strong>
+            <small>Umore: <strong>${d.livello_umore}/10</strong> | Dolore: <strong class="text-danger">${d.livello_dolore}/10</strong></small>
+          </div>
+          <p class="small m-0 mt-1 text-slate-300">${d.sintomi_note || ''}</p>
+        </div>
+      `).join('') || '<p class="text-muted small">Nessuna annotazione registrata.</p>';
+
+      const labels = datos.map(d => d.data);
+      const umoreData = datos.map(d => d.livello_umore);
+      const doloreData = datos.map(d => d.livello_dolore);
+
+      if (chartInstance) chartInstance.destroy();
+
+      const ctx = document.getElementById('chartUmore').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['Nessun Dato'],
+          datasets: [
+            { label: 'Umore / Benessere', data: umoreData, borderColor: '#a855f7', tension: 0.3 },
+            { label: 'Livello Dolore', data: doloreData, borderColor: '#ef4444', tension: 0.3 }
+          ]
+        },
+        options: {
+          scales: {
+            y: { min: 0, max: 10, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          },
+          plugins: { legend: { labels: { color: '#f8fafc' } } }
+        }
+      });
+    }
+
+    async function guardarDiario(e) {
+      e.preventDefault();
+      await fetch('/api/diario', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          familiare_id: activeFamiliareId,
+          data: document.getElementById('dData').value,
+          livello_umore: document.getElementById('dUmore').value,
+          livello_dolore: document.getElementById('dDolore').value,
+          sintomi_note: document.getElementById('dSintomi').value
+        })
+      });
+      document.getElementById('formDiario').reset();
+      document.getElementById('dData').value = new Date().toISOString().split('T')[0];
+      cargarDiarioYGrafica();
+    }
+
+    // FARMACI
+    async function cargarFarmaci() {
+      const res = await fetch(`/api/farmaci?familiare_id=${activeFamiliareId}`);
+      const datos = await res.json();
+      document.getElementById('listaFarmaci').innerHTML = datos.map(f => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+          <div class="d-flex justify-content-between align-items-center">
+            <strong>💊 ${f.nome} <span class="small text-muted">(${f.dose})</span></strong>
+            <select onchange="cambiarStatoFarmaco(${f.id}, this.value)" class="form-select form-select-sm" style="width:auto;">
+              <option value="Attivo" ${f.stato === 'Attivo' ? 'selected' : ''}>Attivo (Allarme On)</option>
+              <option value="Concluso" ${f.stato === 'Concluso' ? 'selected' : ''}>Concluso (Allarme Off)</option>
+            </select>
+          </div>
+          <div class="small text-muted mt-1">⏰ Orario Assunzione: <strong>${f.orario}</strong> | ${f.frequenza || ''}</div>
+          <div class="text-end"><button class="btn btn-sm text-danger p-0 mt-1" onclick="eliminarFarmaco(${f.id})">Elimina</button></div>
+        </div>
+      `).join('') || '<p class="text-muted small">Nessun farmaco registrato.</p>';
+    }
+
+    async function guardarFarmaco(e) {
+      e.preventDefault();
+      await fetch('/api/farmaci', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          familiare_id: activeFamiliareId,
+          nome: document.getElementById('fNome').value,
+          dose: document.getElementById('fDose').value,
+          frequenza: document.getElementById('fFrequenza').value,
+          orario: document.getElementById('fOrario').value,
+          stato: document.getElementById('fStato').value
+        })
+      });
+      document.getElementById('formFarmaci').reset();
+      cargarFarmaci();
+    }
+
+    async function cambiarStatoFarmaco(id, stato) {
+      await fetch(`/api/farmaci/${id}/stato`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ stato })
+      });
+      cargarFarmaci();
+    }
+
+    async function eliminarFarmaco(id) {
+      await fetch(`/api/farmaci/${id}`, { method: 'DELETE' });
+      cargarFarmaci();
+    }
+
+    // VISITE
+    async function cargarVisite() {
+      const res = await fetch(`/api/consulte?familiare_id=${activeFamiliareId}`);
+      const datos = await res.json();
+      document.getElementById('listaVisite').innerHTML = datos.map(v => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+          <div class="d-flex justify-content-between">
+            <strong class="text-warning">🩺 [${v.tipo_evento}] ${v.motivo}</strong>
+            <small>📅 ${v.data} - ⏰ ${v.ora}</small>
+          </div>
+          <div class="small text-slate-300 mt-1">Medico: ${v.medico || 'N/D'} | Luogo: ${v.luogo || 'N/D'}</div>
+          <p class="small text-muted m-0 mt-1">${v.indicazioni || ''}</p>
+          <div class="text-end"><button class="btn btn-sm text-danger p-0" onclick="eliminarVisita(${v.id})">Elimina</button></div>
+        </div>
+      `).join('') || '<p class="text-muted small">Nessun appuntamento registrato.</p>';
+    }
+
+    async function guardarVisita(e) {
+      e.preventDefault();
+      await fetch('/api/consulte', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          familiare_id: activeFamiliareId,
+          tipo_evento: document.getElementById('vTipo').value,
+          motivo: document.getElementById('vMotivo').value,
+          medico: document.getElementById('vMedico').value,
+          luogo: document.getElementById('vLuogo').value,
+          data: document.getElementById('vData').value,
+          ora: document.getElementById('vOra').value,
+          indicazioni: document.getElementById('vIndicazioni').value
+        })
+      });
+      document.getElementById('formVisite').reset();
+      cargarVisite();
+    }
+
+    async function eliminarVisita(id) {
+      await fetch(`/api/consulte/${id}`, { method: 'DELETE' });
+      cargarVisite();
+    }
+
+    // MEDICI
+    async function cargarMedici() {
+      const res = await fetch(`/api/medici?familiare_id=${activeFamiliareId}`);
+      const datos = await res.json();
+      document.getElementById('listaMedici').innerHTML = datos.map(m => `
+        <div class="col-md-6">
+          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+            <h6 class="m-0 text-white">${m.nome}</h6>
+            <small style="color: var(--accent-soft);">${m.specialita || ''}</small>
+            <div class="small text-slate-300 mt-2">🏢 ${m.struttura || ''}</div>
+            <div class="small text-muted">📍 ${m.indirizzo || ''}</div>
+            <div class="small text-success mt-1">📞 ${m.telefono || ''}</div>
+            <button class="btn btn-sm text-danger p-0 float-end mt-1" onclick="eliminarMedico(${m.id})">Elimina</button>
+          </div>
+        </div>
+      `).join('') || '<p class="text-muted small">Nessun medico salvato.</p>';
+    }
+
+    async function guardarMedico(e) {
+      e.preventDefault();
+      await fetch('/api/medici', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          familiare_id: activeFamiliareId,
+          nome: document.getElementById('mNome').value,
+          specialita: document.getElementById('mSpecialita').value,
+          struttura: document.getElementById('mStruttura').value,
+          indirizzo: document.getElementById('mIndirizzo').value,
+          telefono: document.getElementById('mTelefono').value
+        })
+      });
+      document.getElementById('formMedici').reset();
+      cargarMedici();
+    }
+
+    async function eliminarMedico(id) {
+      await fetch(`/api/medici/${id}`, { method: 'DELETE' });
+      cargarMedici();
+    }
+
+    // ESAMI
+    async function cargarEsami() {
+      const res = await fetch(`/api/esami?familiare_id=${activeFamiliareId}`);
+      const datos = await res.json();
+      document.getElementById('listaEsami').innerHTML = datos.map(e => `
+        <div class="col-md-6">
+          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+            <h6>📄 ${e.titolo} <span class="badge bg-secondary">${e.categoria}</span></h6>
+            <small class="text-muted">Data: ${e.data}</small><br>
+            ${e.file_path ? `<a href="${e.file_path}" target="_blank" class="btn btn-sm btn-outline-info mt-2">👁️ Apri Documento / Foto</a>` : ''}
+            <button class="btn btn-sm text-danger float-end mt-2" onclick="eliminarEsame(${e.id})">Elimina</button>
+          </div>
+        </div>
+      `).join('') || '<p class="text-muted small">Nessun documento o foto presente.</p>';
+    }
+
+    async function guardarEsame(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('familiare_id', activeFamiliareId);
+      formData.append('titolo', document.getElementById('eTitolo').value);
+      formData.append('categoria', document.getElementById('eCategoria').value);
+      formData.append('data', document.getElementById('eData').value);
+      
+      const fileInput = document.getElementById('eFile');
+      if (fileInput.files.length > 0) {
+        formData.append('documento', fileInput.files[0]);
+      }
+
+      await fetch('/api/esami', { method: 'POST', body: formData });
+      document.getElementById('formEsami').reset();
+      document.getElementById('eData').value = new Date().toISOString().split('T')[0];
+      cargarEsami();
+    }
+
+    async function eliminarEsame(id) {
+      await fetch(`/api/esami/${id}`, { method: 'DELETE' });
+      cargarEsami();
+    }
+
+    // ALARMAS
+    async function verificarAlarmas() {
+      const aho = new Date();
+      const horaActual = aho.toTimeString().substring(0, 5);
+      const fechaActual = aho.toISOString().split('T')[0];
+
+      const resF = await fetch(`/api/farmaci?familiare_id=${activeFamiliareId}`);
+      const farmaci = await resF.json();
+      farmaci.forEach(f => {
+        if (f.stato === 'Attivo' && f.orario === horaActual) {
+          alert(`⏰ PROMEMORIA FARMACO!\n\nÈ l'ora di prendere: ${f.nome} (${f.dose})`);
+        }
+      });
+
+      const resV = await fetch(`/api/consulte?familiare_id=${activeFamiliareId}`);
+      const visite = await resV.json();
+      visite.forEach(v => {
+        if (v.data === fechaActual && v.ora === horaActual) {
+          alert(`🩺 PROMEMORIA APPUNTAMENTO!\n\nHai un evento ora: ${v.motivo} presso ${v.luogo || 'luogo non specificato'}`);
+        }
+      });
+    }
+
+    async function inviarSuggerimento() {
+      const testo = document.getElementById('suggerimentoTesto').value;
+      if (!testo) return;
+      await fetch('/api/suggerimenti', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ testo })
+      });
+      alert('Grazie per il tuo suggerimento!');
+      document.getElementById('suggerimentoTesto').value = '';
+    }
+
+    function abrirModalMiembro() { 
+      new bootstrap.Modal(document.getElementById('modalMiembro')).show(); 
+    }
+
+    async function crearMiembro() {
+      const nome = document.getElementById('mNomeF').value;
+      const parentela = document.getElementById('mParentelaF').value;
+      if (!nome) return;
+      await fetch('/api/familiari', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nome, parentela })
+      });
+      location.reload();
+    }
+  </script>
+</body>
+</html>
