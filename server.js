@@ -188,4 +188,8 @@ app.get('/api/suggerimenti', (req, res) => {
   const rows = db.prepare('SELECT * FROM suggerimenti ORDER BY id DESC').all();
   res.json(rows);
 });
+app.delete('/api/suggerimenti/:id', (req, res) => {
+  db.prepare('DELETE FROM suggerimenti WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
+});
 app.listen(3000, () => console.log('🚀 Cartella Clinica Personale attiva su http://localhost:3000'));
