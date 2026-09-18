@@ -2,10 +2,18 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cartella Clinica Personale</title>
+  
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js para gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Icono e instalación PWA para móvil -->
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png">
+
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -14,51 +22,92 @@
       --accent-soft: #a855f7;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      padding-bottom: 20px;
     }
 
+    /* Encabezado principal reorganizado */
     .main-header {
       background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%);
-      padding: 16px 28px;
+      padding: 18px 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
     }
 
+    .user-selector-container {
+      background: rgba(15, 23, 42, 0.4);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Tabs / Navegación por pestañas fluida */
     .nav-tabs {
-      border-bottom: 2px solid #334155;
+      border-bottom: 2px solid var(--border-color);
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-tabs .nav-item {
+      white-space: nowrap;
     }
 
     .nav-tabs .nav-link {
       color: var(--text-sub);
       font-weight: 600;
       border: none;
-      padding: 12px 20px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
+      border-radius: 10px 10px 0 0;
     }
 
     .nav-tabs .nav-link.active {
       background-color: var(--accent-purple);
       color: white;
-      border-radius: 8px 8px 0 0;
+      box-shadow: 0 -2px 10px rgba(124, 58, 237, 0.3);
     }
 
+    /* Tarjetas y Contenedores */
     .card-custom {
       background-color: var(--card-dark);
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-bottom: 20px;
+    }
+
+    .card-custom:hover {
+      border-color: rgba(168, 85, 247, 0.4);
     }
 
     .form-control, .form-select {
       background-color: #0f172a;
-      border: 1px solid #334155;
+      border: 1px solid var(--border-color);
       color: white;
-      border-radius: 8px;
+      border-radius: 10px;
+      padding: 10px 12px;
     }
 
     .form-control:focus, .form-select:focus {
@@ -73,17 +122,24 @@
       font-style: italic;
     }
 
+    /* Botones Interactivos */
     .btn-purple {
-      background-color: var(--accent-purple);
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
       color: white;
       font-weight: 600;
       border: none;
-      border-radius: 8px;
-      padding: 10px 18px;
+      border-radius: 10px;
+      padding: 12px 20px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-purple:active {
+      transform: scale(0.98);
     }
 
     .btn-purple:hover {
-      background-color: #6d28d9;
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
       color: white;
     }
 
@@ -92,9 +148,14 @@
       color: #cbd5e1;
       border: none;
       border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 0.8rem;
+      padding: 6px 14px;
+      font-size: 0.82rem;
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-tag:active {
+      transform: scale(0.95);
     }
 
     .quick-tag:hover {
@@ -104,15 +165,30 @@
 
     .legal-footer {
       background-color: #1e293b;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border-color);
       font-size: 0.82rem;
       color: var(--text-sub);
+      border-radius: 16px 16px 0 0;
     }
 
-    /* FORMATO DE IMPRESIÓN PROFESIONAL */
+    /* Ajuste para móviles */
+    @media (max-width: 768px) {
+      .main-header {
+        padding: 14px;
+      }
+      .card-custom {
+        padding: 16px;
+      }
+      .btn {
+        width: 100%;
+        margin-bottom: 6px;
+      }
+    }
+
+    /* Formato de impresión profesional */
     @media print {
       body { background-color: white !important; color: black !important; }
-      .no-print, nav, .btn, form, input, select, .nav-tabs, footer { display: none !important; }
+      .no-print, nav, .btn, form, input, select, .nav-tabs, footer, .print-btn-section { display: none !important; }
       .card-custom { background-color: white !important; border: 1px solid #ccc !important; color: black !important; box-shadow: none !important; }
       .print-header { display: block !important; border-bottom: 2px solid #000; margin-bottom: 20px; }
       .text-slate-300, .text-muted { color: black !important; }
@@ -123,32 +199,35 @@
 </head>
 <body>
 
-  <!-- Encabezado Principal -->
-  <header class="main-header d-flex justify-content-between align-items-center no-print mb-4">
-    <div class="d-flex align-items-center gap-2">
+  <!-- Encabezado Principal Reorganizado -->
+  <header class="main-header no-print mb-3">
+    <div class="text-center text-md-start mb-2">
       <h3 class="m-0 fw-bold text-white">🏥 CARTELLA CLINICA PERSONALE</h3>
     </div>
-    <div class="d-flex align-items-center gap-3">
-      <div class="d-flex align-items-center gap-2">
-        <small class="text-light opacity-75">PAZIENTE SELEZIONATO:</small>
-        <select id="selectProfilo" class="form-select form-select-sm" onchange="cambiarPerfil()" style="width: auto;"></select>
+    
+    <!-- Sección del perfil justo abajo del título -->
+    <div class="user-selector-container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2 w-100 w-sm-auto">
+        <small class="text-light opacity-75 fw-bold text-nowrap">PROFILO ATTIVO:</small>
+        <select id="selectProfilo" class="form-select form-select-sm fw-bold text-white bg-dark" onchange="cambiarPerfil()">
+          <option value="1">👤 Usuario 1</option>
+        </select>
       </div>
-      <button class="btn btn-sm btn-outline-light" onclick="abrirModalMiembro()">+ Nuovo Membro</button>
-      <button class="btn btn-sm btn-success fw-bold px-3" onclick="window.print()">🖨️ Stampa Report Medico</button>
+      <button class="btn btn-sm btn-outline-light w-100 w-sm-auto fw-semibold" onclick="abrirModalMiembro()">+ Nuovo Membro</button>
     </div>
   </header>
 
   <!-- Encabezado de Impresión -->
   <div class="container print-header">
     <h2 class="fw-bold m-0 text-uppercase">REPORTE CLINICO DEL PAZIENTE</h2>
-    <p class="m-0"><strong>Paziente:</strong> <span id="printNomePaziente">---</span> | <strong>Data Report:</strong> <span id="printData"></span></p>
+    <p class="m-0"><strong>Paziente:</strong> <span id="printNomePaziente">Usuario 1</span> | <strong>Data Report:</strong> <span id="printData"></span></p>
     <hr>
   </div>
 
-  <div class="container-fluid px-4">
+  <div class="container-fluid px-2 px-md-4">
 
     <!-- Navegación por Pestañas -->
-    <ul class="nav nav-tabs mb-4 no-print" id="mainTabs">
+    <ul class="nav nav-tabs mb-3 no-print" id="mainTabs">
       <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabDashboard">📊 DASHBOARD</a></li>
       <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabDiario">📝 DIARIO E SINTOMI</a></li>
       <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFarmaci">💊 FARMACI E ALLARMI</a></li>
@@ -162,14 +241,14 @@
       
       <!-- DASHBOARD -->
       <div class="tab-pane fade show active" id="tabDashboard">
-        <div class="row g-4">
-          <div class="col-md-12">
+        <div class="row g-3">
+          <div class="col-12">
             <div class="card-custom">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h6 class="fw-bold text-uppercase m-0" style="color: var(--accent-soft);">📈 Andamento Clinico: Umore e Livello Dolore</h6>
-                <small class="text-muted">Grafico di comprensione medica rapida (1 secondo)</small>
+                <small class="text-muted">Grafico di comprensione medica rapida</small>
               </div>
-              <canvas id="chartUmore" style="max-height: 260px;"></canvas>
+              <canvas id="chartUmore" style="max-height: 280px; width: 100%;"></canvas>
             </div>
           </div>
         </div>
@@ -177,11 +256,12 @@
 
       <!-- DIARIO E SINTOMI -->
       <div class="tab-pane fade" id="tabDiario">
-        <div class="row g-4">
-          <div class="col-md-5 no-print">
+        <div class="row g-3">
+          <div class="col-lg-5 no-print">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">📝 Diario Clinico Quotidiano</h6>
               <form id="formDiario" onsubmit="guardarDiario(event)">
+                <input type="hidden" id="editDiarioId" value="">
                 <div class="mb-2">
                   <label class="form-label small">Data del Registro</label>
                   <input type="date" id="dData" class="form-control" required>
@@ -212,11 +292,11 @@
                 <div class="mb-3">
                   <textarea id="dSintomi" class="form-control" rows="3" placeholder="Scrivi qui i sintomi o note fisiologiche del giorno..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-purple w-100">SALVA NEL DIARIO 🌿</button>
+                <button type="submit" id="btnSubmitDiario" class="btn btn-purple w-100">SALVA NEL DIARIO 🌿</button>
               </form>
             </div>
           </div>
-          <div class="col-md-7">
+          <div class="col-lg-7">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Storico Annotazioni Sintomi</h6>
               <div id="listaDiario"></div>
@@ -227,30 +307,31 @@
 
       <!-- FARMACI E ALLARMI -->
       <div class="tab-pane fade" id="tabFarmaci">
-        <div class="row g-4">
-          <div class="col-md-4 no-print">
+        <div class="row g-3">
+          <div class="col-lg-4 no-print">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">💊 Terapia e Programmazione Pastiglie</h6>
               <form id="formFarmaci" onsubmit="guardarFarmaco(event)">
+                <input type="hidden" id="editFarmacoId" value="">
                 <div class="mb-2"><input type="text" id="fNome" class="form-control" placeholder="es. Ibuprofene" required></div>
                 <div class="mb-2"><input type="text" id="fDose" class="form-control" placeholder="es. 400 mg"></div>
                 <div class="mb-2"><input type="text" id="fFrequenza" class="form-control" placeholder="es. Ogni 8 ore al bisogno"></div>
                 <div class="mb-2">
-                  <label class="form-label small">Orario Allarme Pastiglia</label>
+                  <label class="form-label small">Orario Allarme Pastiglia (Notifica Smartphone)</label>
                   <input type="time" id="fOrario" class="form-control" required>
                 </div>
                 <div class="mb-3">
                   <label class="form-label small">Stato del Trattamento</label>
                   <select id="fStato" class="form-select">
-                    <option value="Attivo">Attivo (Allarme On)</option>
-                    <option value="Concluso">Concluso (Allarme Off)</option>
+                    <option value="Attivo">Attivo (Allarme On 🔔)</option>
+                    <option value="Concluso">Concluso (Allarme Off 🔕)</option>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-purple w-100">SALVA TERAPIA</button>
+                <button type="submit" id="btnSubmitFarmaco" class="btn btn-purple w-100">SALVA TERAPIA</button>
               </form>
             </div>
           </div>
-          <div class="col-md-8">
+          <div class="col-lg-8">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Farmaci Registrati</h6>
               <div id="listaFarmaci"></div>
@@ -261,11 +342,12 @@
 
       <!-- VISITE ED ESAMI -->
       <div class="tab-pane fade" id="tabVisite">
-        <div class="row g-4">
-          <div class="col-md-4 no-print">
+        <div class="row g-3">
+          <div class="col-lg-4 no-print">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">🩺 Prenota Visita o Ritiro Referti</h6>
               <form id="formVisite" onsubmit="guardarVisita(event)">
+                <input type="hidden" id="editVisitaId" value="">
                 <div class="mb-2">
                   <select id="vTipo" class="form-select">
                     <option value="Visita Medica">Visita Medica</option>
@@ -275,15 +357,15 @@
                 </div>
                 <div class="mb-2"><input type="text" id="vMotivo" class="form-control" placeholder="es. Controllo Cardiologico" required></div>
                 <div class="mb-2"><input type="text" id="vMedico" class="form-control" placeholder="es. Dott. Rossi"></div>
-                <div class="mb-2"><input type="text" id="vLuogo" class="form-control" placeholder="es. Ospedale San Raffaele, Via Olgettina 60"></div>
+                <div class="mb-2"><input type="text" id="vLuogo" class="form-control" placeholder="es. Ospedale San Raffaele"></div>
                 <div class="mb-2"><input type="date" id="vData" class="form-control" required></div>
                 <div class="mb-2"><input type="time" id="vOra" class="form-control" required></div>
                 <div class="mb-3"><textarea id="vIndicazioni" class="form-control" placeholder="Indicazioni (es. Digiuno 12 ore)"></textarea></div>
-                <button type="submit" class="btn btn-purple w-100">SALVA CON PROMEMORIA</button>
+                <button type="submit" id="btnSubmitVisita" class="btn btn-purple w-100">SALVA CON PROMEMORIA</button>
               </form>
             </div>
           </div>
-          <div class="col-md-8">
+          <div class="col-lg-8">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Prossimi Appuntamenti e Controlli</h6>
               <div id="listaVisite"></div>
@@ -294,21 +376,22 @@
 
       <!-- MEDICI E SPECIALISTI -->
       <div class="tab-pane fade" id="tabMedici">
-        <div class="row g-4">
-          <div class="col-md-4 no-print">
+        <div class="row g-3">
+          <div class="col-lg-4 no-print">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">👨‍⚕️ Aggiungi Medico di Riferimento</h6>
               <form id="formMedici" onsubmit="guardarMedico(event)">
+                <input type="hidden" id="editMedicoId" value="">
                 <div class="mb-2"><input type="text" id="mNome" class="form-control" placeholder="es. Dott. Marco Bianchi" required></div>
                 <div class="mb-2"><input type="text" id="mSpecialita" class="form-control" placeholder="es. Cardiologo / Medico Curante"></div>
                 <div class="mb-2"><input type="text" id="mStruttura" class="form-control" placeholder="es. Clinica La Madonnina"></div>
                 <div class="mb-2"><input type="text" id="mIndirizzo" class="form-control" placeholder="es. Via Milano 12, Milano"></div>
                 <div class="mb-3"><input type="text" id="mTelefono" class="form-control" placeholder="es. +39 02 1234567"></div>
-                <button type="submit" class="btn btn-purple w-100">SALVA MEDICO</button>
+                <button type="submit" id="btnSubmitMedico" class="btn btn-purple w-100">SALVA MEDICO</button>
               </form>
             </div>
           </div>
-          <div class="col-md-8">
+          <div class="col-lg-8">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Elenco Medici Sanitari</h6>
               <div id="listaMedici" class="row g-3"></div>
@@ -319,8 +402,8 @@
 
       <!-- DOCUMENTI ED ESAMI -->
       <div class="tab-pane fade" id="tabEsami">
-        <div class="row g-4">
-          <div class="col-md-4 no-print">
+        <div class="row g-3">
+          <div class="col-lg-4 no-print">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">📁 Carica o Scatta Foto Esame</h6>
               <form id="formEsami" onsubmit="guardarEsame(event)">
@@ -342,7 +425,7 @@
               </form>
             </div>
           </div>
-          <div class="col-md-8">
+          <div class="col-lg-8">
             <div class="card-custom">
               <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">Archivio Esami e Foto</h6>
               <div id="listaEsami" class="row g-3"></div>
@@ -351,29 +434,47 @@
         </div>
       </div>
 
-      <!-- SUGGERIMENTI -->
+      <!-- SUGGERIMENTI / MIGLIORA L'APP (CON LECTURA INTERNA) -->
       <div class="tab-pane fade" id="tabSuggerimenti">
-        <div class="card-custom">
-          <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">💡 Proponi Miglioramenti per l'App</h6>
-          <textarea id="suggerimentoTesto" class="form-control mb-3" rows="4" placeholder="Scrivi qui quali nuove funzioni ti piacerebbe vedere nella Cartella Clinica..."></textarea>
-          <button class="btn btn-purple" onclick="inviarSuggerimento()">INVIA SUGGERIMENTO</button>
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">💡 Proponi Miglioramenti per l'App</h6>
+              <textarea id="suggerimentoTesto" class="form-control mb-3" rows="4" placeholder="Scrivi qui quali nuove funzioni ti piacerebbe vedere nella Cartella Clinica..."></textarea>
+              <button class="btn btn-purple w-100" onclick="inviarSuggerimento()">INVIA SUGGERIMENTO 🚀</button>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card-custom">
+              <h6 class="fw-bold text-uppercase mb-3" style="color: var(--accent-soft);">📥 Suggerimenti Ricevuti (Vista Admin)</h6>
+              <div id="listaSuggerimenti" style="max-height: 350px; overflow-y: auto;"></div>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
+
+    <!-- Botón de impresión ubicado al final, antes del pie de página -->
+    <div class="text-center my-4 print-btn-section no-print">
+      <button class="btn btn-success btn-lg fw-bold px-4 shadow" onclick="window.print()">
+        🖨️ Stampa Report Medico Completo
+      </button>
+    </div>
+
   </div>
 
   <!-- Pie de página (Legal & GDPR Italia) -->
-  <footer class="legal-footer no-print mt-5 p-4">
+  <footer class="legal-footer no-print mt-4 p-4">
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-6 mb-2">
+      <div class="row g-3">
+        <div class="col-md-6">
           <strong class="text-white">🔒 Protezione Dati & Privacy (GDPR UE 2016/679)</strong>
-          <p class="m-0">I dati clinici sono salvati unicamente nel tuo dispositivo locale (<code>historial.db</code>). Nessun dato viene trasmesso o venduto a terzi.</p>
+          <p class="m-0 mt-1">I dati clinici sono salvati unicamente nel tuo dispositivo e server privato locale (<code>historial.db</code>). Nessun dato viene ceduto o venduto a terzi.</p>
         </div>
         <div class="col-md-6">
           <strong class="text-warning">⚖️ Chiarimento Legale & Disclaimer Medico (Art. 2222 C.C.)</strong>
-          <p class="m-0">Questo diario clinico personale è uno strumento informativo e non costituisce diagnosi o sostituto del parere medico professionale.</p>
+          <p class="m-0 mt-1">Questo diario clinico personale è uno strumento informativo ad uso privato e non costituisce diagnosi o sostituto del parere medico professionale.</p>
         </div>
       </div>
     </div>
@@ -381,27 +482,41 @@
 
   <!-- Modal Nuevo Miembro -->
   <div class="modal fade" id="modalMiembro" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content" style="background-color: var(--card-dark); color: white; border: 1px solid #334155;">
-        <div class="modal-header"><h5 class="modal-title">+ Nuovo Membro Famiglia</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body">
-          <input type="text" id="mNomeF" class="form-control mb-2" placeholder="Nome Completo">
-          <input type="text" id="mParentelaF" class="form-control" placeholder="Parentela (es. Madre, Figlio)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background-color: var(--card-dark); color: white; border: 1px solid var(--border-color);">
+        <div class="modal-header border-bottom-0">
+          <h5 class="modal-title">+ Nuovo Membro Famiglia</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-purple w-100" onclick="crearMiembro()">Salva Membro</button></div>
+        <div class="modal-body">
+          <input type="text" id="mNomeF" class="form-control mb-2" placeholder="Nome Completo (es. Maria Miranda)">
+          <input type="text" id="mParentelaF" class="form-control" placeholder="Parentela (es. Madre, Fidanzata)">
+        </div>
+        <div class="modal-footer border-top-0">
+          <button type="button" class="btn btn-purple w-100" onclick="crearMiembro()">Salva Membro</button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
     let activeFamiliareId = 1;
     let chartInstance = null;
+    let diarioCache = [], farmaciCache = [], visiteCache = [], mediciCache = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('printData').innerText = new Date().toLocaleDateString('it-IT');
       document.getElementById('dData').value = new Date().toISOString().split('T')[0];
       document.getElementById('eData').value = new Date().toISOString().split('T')[0];
+      
+      // Solicitar permiso de notificaciones para alarmas de smartphone
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+
       cargarFamiliari();
       setInterval(verificarAlarmas, 30000); // Chequea alarmas cada 30 segundos
     });
@@ -409,8 +524,8 @@
     function actualizarSliderLabels() {
       const u = document.getElementById('dUmore').value;
       const d = document.getElementById('dDolore').value;
-      document.getElementById('labelUmore').innerText = `${u}/10${u > 6 ? '😊' : '😐'}`;
-      document.getElementById('labelDolore').innerText = `${d}/10${d > 5 ? '🔴' : '🟢'}`;
+      document.getElementById('labelUmore').innerText = `${u}/10 ${u > 6 ? '😊' : '😐'}`;
+      document.getElementById('labelDolore').innerText = `${d}/10 ${d > 5 ? '🔴' : '🟢'}`;
     }
 
     function addTag(texto) {
@@ -423,14 +538,20 @@
         const res = await fetch('/api/familiari');
         const datos = await res.json();
         const select = document.getElementById('selectProfilo');
-        select.innerHTML = datos.map(f => `<option value="${f.id}">${f.nome} (${f.parentela})</option>`).join('');
-        if (datos.length > 0) {
+        
+        if (datos && datos.length > 0) {
+          select.innerHTML = datos.map((f, index) => 
+            `<option value="${f.id}">${index === 0 ? '👤 Usuario 1' : f.nome + ' (' + f.parentela + ')'}</option>`
+          ).join('');
           activeFamiliareId = datos[0].id;
-          document.getElementById('printNomePaziente').innerText = datos[0].nome;
+          document.getElementById('printNomePaziente').innerText = select.options[0].text;
+        } else {
+          select.innerHTML = `<option value="1">👤 Usuario 1</option>`;
+          activeFamiliareId = 1;
         }
         cargarTodo();
       } catch (err) {
-        console.error('Errore durante il caricamento dei familiari:', err);
+        console.error('Errore caricamento familiari:', err);
       }
     }
 
@@ -447,26 +568,31 @@
       cargarVisite();
       cargarMedici();
       cargarEsami();
+      cargarSuggerimenti();
     }
 
     // DIARIO & GRAFICA
     async function cargarDiarioYGrafica() {
       const res = await fetch(`/api/diario?familiare_id=${activeFamiliareId}`);
-      const datos = await res.json();
+      diarioCache = await res.json();
       
-      document.getElementById('listaDiario').innerHTML = datos.map(d => `
-        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
-          <div class="d-flex justify-content-between">
+      document.getElementById('listaDiario').innerHTML = diarioCache.map(d => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
+          <div class="d-flex justify-content-between align-items-center">
             <strong style="color: var(--accent-soft);">📅 ${d.data}</strong>
-            <small>Umore: <strong>${d.livello_umore}/10</strong> | Dolore: <strong class="text-danger">${d.livello_dolore}/10</strong></small>
+            <div>
+              <button class="btn btn-sm text-info p-0 me-2" onclick="prepararEditarDiario(${d.id})">✏️ Edita</button>
+              <button class="btn btn-sm text-danger p-0" onclick="eliminarDiario(${d.id})">🗑️ Elimina</button>
+            </div>
           </div>
-          <p class="small m-0 mt-1 text-slate-300">${d.sintomi_note || ''}</p>
+          <div class="small text-muted mt-1">Umore: <strong>${d.livello_umore}/10</strong> | Dolore: <strong class="text-danger">${d.livello_dolore}/10</strong></div>
+          <p class="small m-0 mt-2 text-slate-300">${d.sintomi_note || ''}</p>
         </div>
       `).join('') || '<p class="text-muted small">Nessuna annotazione registrata.</p>';
 
-      const labels = datos.map(d => d.data);
-      const umoreData = datos.map(d => d.livello_umore);
-      const doloreData = datos.map(d => d.livello_dolore);
+      const labels = diarioCache.map(d => d.data);
+      const umoreData = diarioCache.map(d => d.livello_umore);
+      const doloreData = diarioCache.map(d => d.livello_dolore);
 
       if (chartInstance) chartInstance.destroy();
 
@@ -476,11 +602,13 @@
         data: {
           labels: labels.length ? labels : ['Nessun Dato'],
           datasets: [
-            { label: 'Umore / Benessere', data: umoreData, borderColor: '#a855f7', tension: 0.3 },
-            { label: 'Livello Dolore', data: doloreData, borderColor: '#ef4444', tension: 0.3 }
+            { label: 'Umore / Benessere', data: umoreData, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', tension: 0.3, fill: true },
+            { label: 'Livello Dolore', data: doloreData, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.3, fill: true }
           ]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             y: { min: 0, max: 10, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
             x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
@@ -492,128 +620,230 @@
 
     async function guardarDiario(e) {
       e.preventDefault();
-      await fetch('/api/diario', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          familiare_id: activeFamiliareId,
-          data: document.getElementById('dData').value,
-          livello_umore: document.getElementById('dUmore').value,
-          livello_dolore: document.getElementById('dDolore').value,
-          sintomi_note: document.getElementById('dSintomi').value
-        })
-      });
+      const editId = document.getElementById('editDiarioId').value;
+      const payload = {
+        familiare_id: activeFamiliareId,
+        data: document.getElementById('dData').value,
+        livello_umore: document.getElementById('dUmore').value,
+        livello_dolore: document.getElementById('dDolore').value,
+        sintomi_note: document.getElementById('dSintomi').value
+      };
+
+      if (editId) {
+        await fetch(`/api/diario/${editId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('editDiarioId').value = '';
+        document.getElementById('btnSubmitDiario').innerText = 'SALVA NEL DIARIO 🌿';
+      } else {
+        await fetch('/api/diario', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+      }
+
       document.getElementById('formDiario').reset();
       document.getElementById('dData').value = new Date().toISOString().split('T')[0];
       cargarDiarioYGrafica();
     }
 
+    function prepararEditarDiario(id) {
+      const item = diarioCache.find(d => d.id === id);
+      if (!item) return;
+      document.getElementById('editDiarioId').value = item.id;
+      document.getElementById('dData').value = item.data;
+      document.getElementById('dUmore').value = item.livello_umore;
+      document.getElementById('dDolore').value = item.livello_dolore;
+      document.getElementById('dSintomi').value = item.sintomi_note;
+      actualizarSliderLabels();
+      document.getElementById('btnSubmitDiario').innerText = 'AGGIORNA ANNOTAZIONE ✏️';
+    }
+
+    async function eliminarDiario(id) {
+      if (confirm('Vuoi eliminare questa annotazione dal diario?')) {
+        await fetch(`/api/diario/${id}`, { method: 'DELETE' });
+        cargarDiarioYGrafica();
+      }
+    }
+
     // FARMACI
     async function cargarFarmaci() {
       const res = await fetch(`/api/farmaci?familiare_id=${activeFamiliareId}`);
-      const datos = await res.json();
-      document.getElementById('listaFarmaci').innerHTML = datos.map(f => `
-        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+      farmaciCache = await res.json();
+      document.getElementById('listaFarmaci').innerHTML = farmaciCache.map(f => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
           <div class="d-flex justify-content-between align-items-center">
-            <strong>💊 ${f.nome} <span class="small text-muted">(${f.dose})</span></strong>
-            <select onchange="cambiarStatoFarmaco(${f.id}, this.value)" class="form-select form-select-sm" style="width:auto;">
-              <option value="Attivo" ${f.stato === 'Attivo' ? 'selected' : ''}>Attivo (Allarme On)</option>
-              <option value="Concluso" ${f.stato === 'Concluso' ? 'selected' : ''}>Concluso (Allarme Off)</option>
-            </select>
+            <strong>💊 ${f.nome} <span class="small text-muted">(${f.dose || ''})</span></strong>
+            <div>
+              <button class="btn btn-sm text-info p-0 me-2" onclick="prepararEditarFarmaco(${f.id})">✏️ Edita</button>
+              <button class="btn btn-sm text-danger p-0" onclick="eliminarFarmaco(${f.id})">🗑️ Elimina</button>
+            </div>
           </div>
           <div class="small text-muted mt-1">⏰ Orario Assunzione: <strong>${f.orario}</strong> | ${f.frequenza || ''}</div>
-          <div class="text-end"><button class="btn btn-sm text-danger p-0 mt-1" onclick="eliminarFarmaco(${f.id})">Elimina</button></div>
+          <div class="mt-2 d-flex justify-content-between align-items-center">
+            <span class="badge ${f.stato === 'Attivo' ? 'bg-success' : 'bg-secondary'}">${f.stato === 'Attivo' ? 'Allarme Attivo 🔔' : 'Allarme Disattivato 🔕'}</span>
+            <button class="btn btn-sm btn-outline-light p-1" onclick="cambiarStatoFarmaco(${f.id}, '${f.stato === 'Attivo' ? 'Concluso' : 'Attivo'}')">Cambia Stato</button>
+          </div>
         </div>
       `).join('') || '<p class="text-muted small">Nessun farmaco registrato.</p>';
     }
 
     async function guardarFarmaco(e) {
       e.preventDefault();
-      await fetch('/api/farmaci', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          familiare_id: activeFamiliareId,
-          nome: document.getElementById('fNome').value,
-          dose: document.getElementById('fDose').value,
-          frequenza: document.getElementById('fFrequenza').value,
-          orario: document.getElementById('fOrario').value,
-          stato: document.getElementById('fStato').value
-        })
-      });
+      const editId = document.getElementById('editFarmacoId').value;
+      const payload = {
+        familiare_id: activeFamiliareId,
+        nome: document.getElementById('fNome').value,
+        dose: document.getElementById('fDose').value,
+        frequenza: document.getElementById('fFrequenza').value,
+        orario: document.getElementById('fOrario').value,
+        stato: document.getElementById('fStato').value
+      };
+
+      if (editId) {
+        await fetch(`/api/farmaci/${editId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('editFarmacoId').value = '';
+        document.getElementById('btnSubmitFarmaco').innerText = 'SALVA TERAPIA';
+      } else {
+        await fetch('/api/farmaci', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+      }
+
       document.getElementById('formFarmaci').reset();
       cargarFarmaci();
     }
 
-    async function cambiarStatoFarmaco(id, stato) {
+    function prepararEditarFarmaco(id) {
+      const item = farmaciCache.find(f => f.id === id);
+      if (!item) return;
+      document.getElementById('editFarmacoId').value = item.id;
+      document.getElementById('fNome').value = item.nome;
+      document.getElementById('fDose').value = item.dose;
+      document.getElementById('fFrequenza').value = item.frequenza;
+      document.getElementById('fOrario').value = item.orario;
+      document.getElementById('fStato').value = item.stato;
+      document.getElementById('btnSubmitFarmaco').innerText = 'AGGIORNA TERAPIA ✏️';
+    }
+
+    async function cambiarStatoFarmaco(id, nuovoStato) {
       await fetch(`/api/farmaci/${id}/stato`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ stato })
+        body: JSON.stringify({ stato: nuovoStato })
       });
       cargarFarmaci();
     }
 
     async function eliminarFarmaco(id) {
-      await fetch(`/api/farmaci/${id}`, { method: 'DELETE' });
-      cargarFarmaci();
+      if (confirm('Vuoi eliminare questo farmaco?')) {
+        await fetch(`/api/farmaci/${id}`, { method: 'DELETE' });
+        cargarFarmaci();
+      }
     }
 
     // VISITE
     async function cargarVisite() {
       const res = await fetch(`/api/consulte?familiare_id=${activeFamiliareId}`);
-      const datos = await res.json();
-      document.getElementById('listaVisite').innerHTML = datos.map(v => `
-        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
-          <div class="d-flex justify-content-between">
+      visiteCache = await res.json();
+      document.getElementById('listaVisite').innerHTML = visiteCache.map(v => `
+        <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
+          <div class="d-flex justify-content-between align-items-center">
             <strong class="text-warning">🩺 [${v.tipo_evento}] ${v.motivo}</strong>
-            <small>📅 ${v.data} - ⏰ ${v.ora}</small>
+            <div>
+              <button class="btn btn-sm text-info p-0 me-2" onclick="prepararEditarVisita(${v.id})">✏️ Edita</button>
+              <button class="btn btn-sm text-danger p-0" onclick="eliminarVisita(${v.id})">🗑️ Elimina</button>
+            </div>
           </div>
+          <div class="small text-white mt-1">📅 Data: ${v.data} - ⏰ Ora: ${v.ora}</div>
           <div class="small text-slate-300 mt-1">Medico: ${v.medico || 'N/D'} | Luogo: ${v.luogo || 'N/D'}</div>
-          <p class="small text-muted m-0 mt-1">${v.indicazioni || ''}</p>
-          <div class="text-end"><button class="btn btn-sm text-danger p-0" onclick="eliminarVisita(${v.id})">Elimina</button></div>
+         <p class="small text-muted m-0 mt-1">${v.indicazioni || ''}</p>
         </div>
       `).join('') || '<p class="text-muted small">Nessun appuntamento registrato.</p>';
     }
 
     async function guardarVisita(e) {
       e.preventDefault();
-      await fetch('/api/consulte', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          familiare_id: activeFamiliareId,
-          tipo_evento: document.getElementById('vTipo').value,
-          motivo: document.getElementById('vMotivo').value,
-          medico: document.getElementById('vMedico').value,
-          luogo: document.getElementById('vLuogo').value,
-          data: document.getElementById('vData').value,
-          ora: document.getElementById('vOra').value,
-          indicazioni: document.getElementById('vIndicazioni').value
-        })
-      });
+      const editId = document.getElementById('editVisitaId').value;
+      const payload = {
+        familiare_id: activeFamiliareId,
+        tipo_evento: document.getElementById('vTipo').value,
+        motivo: document.getElementById('vMotivo').value,
+        medico: document.getElementById('vMedico').value,
+        luogo: document.getElementById('vLuogo').value,
+        data: document.getElementById('vData').value,
+        ora: document.getElementById('vOra').value,
+        indicazioni: document.getElementById('vIndicazioni').value
+      };
+
+      if (editId) {
+        await fetch(`/api/consulte/${editId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('editVisitaId').value = '';
+        document.getElementById('btnSubmitVisita').innerText = 'SALVA CON PROMEMORIA';
+      } else {
+        await fetch('/api/consulte', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+      }
+
       document.getElementById('formVisite').reset();
       cargarVisite();
     }
 
+    function prepararEditarVisita(id) {
+      const item = visiteCache.find(v => v.id === id);
+      if (!item) return;
+      document.getElementById('editVisitaId').value = item.id;
+      document.getElementById('vTipo').value = item.tipo_evento;
+      document.getElementById('vMotivo').value = item.motivo;
+      document.getElementById('vMedico').value = item.medico;
+      document.getElementById('vLuogo').value = item.luogo;
+      document.getElementById('vData').value = item.data;
+      document.getElementById('vOra').value = item.ora;
+      document.getElementById('vIndicazioni').value = item.indicazioni;
+      document.getElementById('btnSubmitVisita').innerText = 'AGGIORNA APPUNTAMENTO ✏️';
+    }
+
     async function eliminarVisita(id) {
-      await fetch(`/api/consulte/${id}`, { method: 'DELETE' });
-      cargarVisite();
+      if (confirm('Vuoi eliminare questa visita?')) {
+        await fetch(`/api/consulte/${id}`, { method: 'DELETE' });
+        cargarVisite();
+      }
     }
 
     // MEDICI
     async function cargarMedici() {
       const res = await fetch(`/api/medici?familiare_id=${activeFamiliareId}`);
-      const datos = await res.json();
-      document.getElementById('listaMedici').innerHTML = datos.map(m => `
+      mediciCache = await res.json();
+      document.getElementById('listaMedici').innerHTML = mediciCache.map(m => `
         <div class="col-md-6">
-          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
-            <h6 class="m-0 text-white">${m.nome}</h6>
+          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="m-0 text-white">${m.nome}</h6>
+              <div>
+                <button class="btn btn-sm text-info p-0 me-2" onclick="prepararEditarMedico(${m.id})">✏️</button>
+                <button class="btn btn-sm text-danger p-0" onclick="eliminarMedico(${m.id})">🗑️</button>
+              </div>
+            </div>
             <small style="color: var(--accent-soft);">${m.specialita || ''}</small>
             <div class="small text-slate-300 mt-2">🏢 ${m.struttura || ''}</div>
             <div class="small text-muted">📍 ${m.indirizzo || ''}</div>
-            <div class="small text-success mt-1">📞 ${m.telefono || ''}</div>
-            <button class="btn btn-sm text-danger p-0 float-end mt-1" onclick="eliminarMedico(${m.id})">Elimina</button>
+           <div class="small text-success mt-1">📞 ${m.telefono || ''}</div>
           </div>
         </div>
       `).join('') || '<p class="text-muted small">Nessun medico salvato.</p>';
@@ -621,25 +851,53 @@
 
     async function guardarMedico(e) {
       e.preventDefault();
-      await fetch('/api/medici', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          familiare_id: activeFamiliareId,
-          nome: document.getElementById('mNome').value,
-          specialita: document.getElementById('mSpecialita').value,
-          struttura: document.getElementById('mStruttura').value,
-          indirizzo: document.getElementById('mIndirizzo').value,
-          telefono: document.getElementById('mTelefono').value
-        })
-      });
+      const editId = document.getElementById('editMedicoId').value;
+      const payload = {
+        familiare_id: activeFamiliareId,
+        nome: document.getElementById('mNome').value,
+        specialita: document.getElementById('mSpecialita').value,
+        struttura: document.getElementById('mStruttura').value,
+        indirizzo: document.getElementById('mIndirizzo').value,
+        telefono: document.getElementById('mTelefono').value
+      };
+
+      if (editId) {
+        await fetch(`/api/medici/${editId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('editMedicoId').value = '';
+        document.getElementById('btnSubmitMedico').innerText = 'SALVA MEDICO';
+      } else {
+        await fetch('/api/medici', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+      }
+
       document.getElementById('formMedici').reset();
       cargarMedici();
     }
 
+    function prepararEditarMedico(id) {
+      const item = mediciCache.find(m => m.id === id);
+      if (!item) return;
+      document.getElementById('editMedicoId').value = item.id;
+      document.getElementById('mNome').value = item.nome;
+      document.getElementById('mSpecialita').value = item.specialita;
+      document.getElementById('mStruttura').value = item.struttura;
+      document.getElementById('mIndirizzo').value = item.indirizzo;
+      document.getElementById('mTelefono').value = item.telefono;
+      document.getElementById('btnSubmitMedico').innerText = 'AGGIORNA MEDICO ✏️';
+    }
+
     async function eliminarMedico(id) {
-      await fetch(`/api/medici/${id}`, { method: 'DELETE' });
-      cargarMedici();
+      if (confirm('Vuoi eliminare questo medico?')) {
+        await fetch(`/api/medici/${id}`, { method: 'DELETE' });
+        cargarMedici();
+      }
     }
 
     // ESAMI
@@ -648,11 +906,11 @@
       const datos = await res.json();
       document.getElementById('listaEsami').innerHTML = datos.map(e => `
         <div class="col-md-6">
-          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid #334155;">
+          <div class="p-3 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
             <h6>📄 ${e.titolo} <span class="badge bg-secondary">${e.categoria}</span></h6>
             <small class="text-muted">Data: ${e.data}</small><br>
             ${e.file_path ? `<a href="${e.file_path}" target="_blank" class="btn btn-sm btn-outline-info mt-2">👁️ Apri Documento / Foto</a>` : ''}
-            <button class="btn btn-sm text-danger float-end mt-2" onclick="eliminarEsame(${e.id})">Elimina</button>
+            <button class="btn btn-sm text-danger float-end mt-2" onclick="eliminarEsame(${e.id})">🗑️ Elimina</button>
           </div>
         </div>
       `).join('') || '<p class="text-muted small">Nessun documento o foto presente.</p>';
@@ -678,11 +936,44 @@
     }
 
     async function eliminarEsame(id) {
-      await fetch(`/api/esami/${id}`, { method: 'DELETE' });
-      cargarEsami();
+      if (confirm('Vuoi eliminare questo documento?')) {
+        await fetch(`/api/esami/${id}`, { method: 'DELETE' });
+        cargarEsami();
+      }
     }
 
-    // ALARMAS
+    // SUGGERIMENTI / FEEDBACK CON VISITA INTERNA
+    async function inviarSuggerimento() {
+      const testo = document.getElementById('suggerimentoTesto').value;
+      if (!testo) return alert('Per favore scrivi un commento prima di inviare.');
+      
+      await fetch('/api/suggerimenti', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ suggerimento: testo, data: new Date().toLocaleDateString('it-IT') })
+      });
+      
+      alert('Grazie! Il tuo suggerimento è stato registrato nell\'app.');
+      document.getElementById('suggerimentoTesto').value = '';
+      cargarSuggerimenti();
+    }
+
+    async function cargarSuggerimenti() {
+      try {
+        const res = await fetch('/api/suggerimenti');
+        const datos = await res.json();
+        document.getElementById('listaSuggerimenti').innerHTML = datos.map(s => `
+          <div class="p-3 mb-2 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
+            <small class="text-muted">💬 Commento Ricevuto:</small>
+            <p class="m-0 mt-1 text-white">${s.testo || s.suggerimento}</p>
+          </div>
+        `).join('') || '<p class="text-muted small">Nessun suggerimento presente.</p>';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // ALARMAS NATIVAS DE SMARTPHONE
     async function verificarAlarmas() {
       const aho = new Date();
       const horaActual = aho.toTimeString().substring(0, 5);
@@ -692,7 +983,7 @@
       const farmaci = await resF.json();
       farmaci.forEach(f => {
         if (f.stato === 'Attivo' && f.orario === horaActual) {
-          alert(`⏰ PROMEMORIA FARMACO!\n\nÈ l'ora di prendere: ${f.nome} (${f.dose})`);
+          dispararNotificacion('⏰ PROMEMORIA FARMACO!', `È l'ora di prendere: ${f.nome} (${f.dose || ''})`);
         }
       });
 
@@ -700,37 +991,39 @@
       const visite = await resV.json();
       visite.forEach(v => {
         if (v.data === fechaActual && v.ora === horaActual) {
-          alert(`🩺 PROMEMORIA APPUNTAMENTO!\n\nHai un evento ora: ${v.motivo} presso ${v.luogo || 'luogo non specificato'}`);
+          dispararNotificacion('🩺 PROMEMORIA APPUNTAMENTO!', `Hai un evento ora: ${v.motivo} presso ${v.luogo || 'luogo non specificato'}`);
         }
       });
     }
 
-    async function inviarSuggerimento() {
-      const testo = document.getElementById('suggerimentoTesto').value;
-      if (!testo) return;
-      await fetch('/api/suggerimenti', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ testo })
-      });
-      alert('Grazie per il tuo suggerimento!');
-      document.getElementById('suggerimentoTesto').value = '';
+    function dispararNotificacion(titulo, cuerpo) {
+      // Notificación nativa del smartphone
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: cuerpo, icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png' });
+      }
+      alert(`${titulo}\n\n${cuerpo}`);
     }
 
-    function abrirModalMiembro() { 
-      new bootstrap.Modal(document.getElementById('modalMiembro')).show(); 
+    function abrirModalMiembro() {
+      const modal = new bootstrap.Modal(document.getElementById('modalMiembro'));
+      modal.show();
     }
 
     async function crearMiembro() {
       const nome = document.getElementById('mNomeF').value;
       const parentela = document.getElementById('mParentelaF').value;
-      if (!nome) return;
+      if (!nome) return alert('Inserisci il nome del membro.');
+      
       await fetch('/api/familiari', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ nome, parentela })
       });
-      location.reload();
+      
+      bootstrap.Modal.getInstance(document.getElementById('modalMiembro')).hide();
+      document.getElementById('mNomeF').value = '';
+      document.getElementById('mParentelaF').value = '';
+      cargarFamiliari();
     }
   </script>
 </body>
