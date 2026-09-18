@@ -184,5 +184,8 @@ app.post('/api/suggerimenti', (req, res) => {
   db.prepare('INSERT INTO suggerimenti (testo, data) VALUES (?, ?)').run(req.body.testo, new Date().toISOString());
   res.json({ success: true });
 });
-
+app.get('/api/suggerimenti', (req, res) => {
+  const rows = db.prepare('SELECT * FROM suggerimenti ORDER BY id DESC').all();
+  res.json(rows);
+});
 app.listen(3000, () => console.log('🚀 Cartella Clinica Personale attiva su http://localhost:3000'));
