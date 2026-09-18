@@ -972,9 +972,12 @@ async function cargarSuggerimenti() {
         const testo = s.suggerimento || s.testo || 'Messaggio vuoto';
         const dataInvio = s.data ? new Date(s.data).toLocaleString() : '';
         return `
-          <div class="p-2 mb-2 rounded" style="background-color: #0f172a; border: 1px solid var(--border-color);">
-            <small class="text-white d-block">${testo}</small>
-            ${dataInvio ? `<small class="text-muted" style="font-size:0.75rem;">${dataInvio}</small>` : ''}
+          <div class="p-2 mb-2 rounded d-flex justify-content-between align-items-center" style="background-color: #0f172a; border: 1px solid var(--border-color);">
+            <div>
+              <small class="text-white d-block">${testo}</small>
+              ${dataInvio ? `<small class="text-muted" style="font-size:0.75rem;">${dataInvio}</small>` : ''}
+            </div>
+            <button class="btn btn-danger btn-sm px-2 py-0" onclick="eliminarSuggerimento(${s.id})">🗑️</button>
           </div>
         `;
       }).join('');
@@ -982,6 +985,12 @@ async function cargarSuggerimenti() {
   } catch (e) {
     console.error(e);
   }
+}
+
+async function eliminarSuggerimento(id) {
+  if (!confirm('Eliminare questo suggerimento?')) return;
+  await fetch(`/api/suggerimenti/${id}`, { method: 'DELETE' });
+  cargarSuggerimenti();
 }
 
     // ALARMAS NATIVAS DE SMARTPHONE
