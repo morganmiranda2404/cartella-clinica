@@ -965,7 +965,7 @@ async function cargarSuggerimenti() {
   if (cont) {
     cont.innerHTML = data.map(s => `
       <div class="p-2 mb-2 rounded" style="background:#0f172a; border:1px solid var(--border-color);">
-        <small class="text-white d-block">${s.testo}</small>
+        <small class="text-white d-block">${s.testo} por ${s.suggerimento || s.testo}.
         <small class="text-muted" style="font-size:0.75rem;">${new Date(s.data).toLocaleString()}</small>
       </div>
     `).join('') || '<p class="text-muted small">Nessun suggerimento.</p>';
@@ -1024,6 +1024,7 @@ async function cargarSuggerimenti() {
       document.getElementById('mParentelaF').value = '';
       cargarFamiliari();
     }
+    cargarSuggerimenti();
   </script>
 </body>
 </html>
